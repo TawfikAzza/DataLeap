@@ -1,0 +1,34 @@
+﻿version: "3"
+services:
+  migration-service:
+    image: migration-service
+    build:
+      context: .
+      dockerfile: MigrationService/Dockerfile
+    ports:
+      - "1000:8080"
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ezmoneydb
+      MYSQL_USER: ezmoneyuser
+      MYSQL_PASSWORD: ezmoneypassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+  mongodb:
+    image: mongo:4.4
+    container_name: mongodb-container
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: rootuser
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+volumes:
+  mysql-data:
+  mongodb-data:
