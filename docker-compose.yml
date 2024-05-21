@@ -12,13 +12,26 @@ services:
     container_name: mysql-container
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: ezmoneydb
-      MYSQL_USER: ezmoneyuser
-      MYSQL_PASSWORD: ezmoneypassword
+      MYSQL_DATABASE: expense_tracker
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
     ports:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-container
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+      PMA_PORT: 3306
+    ports:
+      - "9000:80"
+    depends_on:
+      - mysql
   mongodb:
     image: mongo:4.4
     container_name: mongodb-container
