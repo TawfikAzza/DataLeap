@@ -1,6 +1,4 @@
-﻿// MySQL connection string
-
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using MySql.Data.MySqlClient;
 
@@ -14,75 +12,59 @@ string mongoConnStr = "mongodb://localhost:27017";
 string mongoDatabase = "EZMoney_test";
 
 // Connect to MySQL
-using (var mysqlConn = new MySqlConnection(mysqlConnStr))
-{
+using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
     mysqlConn.Open();
-
-    // Migrate User table
+    
     MigrateUsers(mysqlConnStr, mongoConnStr, mongoDatabase);
-
-    // Migrate Group table
     MigrateGroups(mysqlConnStr, mongoConnStr, mongoDatabase);
-
-    // Migrate Expense table
-    //MigrateExpenses(mysqlConnStr, mongoConnStr, mongoDatabase);
+    MigrateExpenses(mysqlConnStr, mongoConnStr, mongoDatabase);
 
     Console.WriteLine("Data migration completed successfully.");
 }
 
-static void MigrateUsers(string mysqlConnStr, string mongoConnStr, string mongoDatabase)
-    {
-        var mongoClient = new MongoClient(mongoConnStr);
-        var mongoDb = mongoClient.GetDatabase(mongoDatabase);
-        var userCollection = mongoDb.GetCollection<BsonDocument>("User");
+static void MigrateUsers(string mysqlConnStr, string mongoConnStr, string mongoDatabase) {
+    var mongoClient = new MongoClient(mongoConnStr);
+    var mongoDb = mongoClient.GetDatabase(mongoDatabase);
+    var userCollection = mongoDb.GetCollection<BsonDocument>("User");
 
-        using (var mysqlConn = new MySqlConnection(mysqlConnStr))
-        {
-            mysqlConn.Open();
-            string query = "SELECT * FROM User";
-            using (var cmd = new MySqlCommand(query, mysqlConn))
-            using (var reader = cmd.ExecuteReader())
-            {
-                var users = new List<BsonDocument>();
-                while (reader.Read())
-                {
-                    var userId = new Guid((byte[])reader["id"]).ToString();
-                    var user = new BsonDocument
-                    {
-                        { "_id", userId },
-                        { "name", reader["name"].ToString() },
-                        { "phone_number", reader["phone_number"].ToString() }
-                    };
+    using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
+        mysqlConn.Open();
+        string query = "SELECT * FROM User";
+        using (var cmd = new MySqlCommand(query, mysqlConn))
+        using (var reader = cmd.ExecuteReader()) {
+            var users = new List<BsonDocument>();
+            while (reader.Read()) {
+                var userId = new Guid((byte[])reader["id"]).ToString();
+                var user = new BsonDocument {
+                    { "_id", userId },
+                    { "name", reader["name"].ToString() },
+                    { "phone_number", reader["phone_number"].ToString() }
+                };
 
-                    // Add expenses and groups later
-                    users.Add(user);
-                }
-                userCollection.InsertMany(users);
-                Console.WriteLine("Users migrated successfully.");
+                // Add expenses and groups later
+                users.Add(user);
             }
+            userCollection.InsertMany(users);
+            Console.WriteLine("Users migrated successfully.");
         }
     }
+}
 
 
-static void MigrateGroups(string mysqlConnStr, string mongoConnStr, string mongoDatabase)
-{
+static void MigrateGroups(string mysqlConnStr, string mongoConnStr, string mongoDatabase) {
     var mongoClient = new MongoClient(mongoConnStr);
     var mongoDb = mongoClient.GetDatabase(mongoDatabase);
     var groupCollection = mongoDb.GetCollection<BsonDocument>("Group");
 
-    using (var mysqlConn = new MySqlConnection(mysqlConnStr))
-    {
+    using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
         mysqlConn.Open();
         string query = "SELECT BIN_TO_UUID(id) as id, name, token FROM `Group`;";
         using (var cmd = new MySqlCommand(query, mysqlConn))
-        using (var reader = cmd.ExecuteReader())
-        {
+        using (var reader = cmd.ExecuteReader()) {
             var groups = new List<BsonDocument>();
-            while (reader.Read())
-            {
+            while (reader.Read()) {
                 var groupId = reader["id"].ToString();
-                var group = new BsonDocument
-                {
+                var group = new BsonDocument {
                     { "_id", groupId },
                     { "name", reader["name"].ToString() },
                     { "token", reader["token"].ToString() }
@@ -91,24 +73,22 @@ static void MigrateGroups(string mysqlConnStr, string mongoConnStr, string mongo
                 groups.Add(group);
             }
 
-            foreach (var group in groups)
-            {
+            foreach (var group in groups) {
                 var groupId = group["_id"].ToString()!;
                 group.Add("users", GetUsersByGroup(mysqlConnStr, groupId));
                 group.Add("expenses", GetExpensesByGroup(mysqlConnStr, groupId));
             }
 
             groupCollection.InsertMany(groups);
+            Console.WriteLine("Groups migrated successfully.");
         }
     }
 }
 
-static BsonArray GetUsersByGroup(string mysqlConnStr, string groupId)
-{
+static BsonArray GetUsersByGroup(string mysqlConnStr, string groupId) {
     var users = new BsonArray();
-    
-    using (var mysqlConn = new MySqlConnection(mysqlConnStr))
-    {
+
+    using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
         mysqlConn.Open();
         string query = @"
             SELECT BIN_TO_UUID(u.id) as id, u.name, u.phone_number 
@@ -116,15 +96,11 @@ static BsonArray GetUsersByGroup(string mysqlConnStr, string groupId)
             JOIN Rel_User_Group rug ON u.id = rug.ID_User 
             WHERE rug.ID_Group = UUID_TO_BIN(@groupId);";
 
-        using (var cmd = new MySqlCommand(query, mysqlConn))
-        {
+        using (var cmd = new MySqlCommand(query, mysqlConn)) {
             cmd.Parameters.AddWithValue("@groupId", groupId);
-            using (var reader = cmd.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    var user = new BsonDocument
-                    {
+            using (var reader = cmd.ExecuteReader()) {
+                while (reader.Read()) {
+                    var user = new BsonDocument {
                         { "user_id", reader["id"].ToString() },
                         { "name", reader["name"].ToString() },
                         { "phone_number", reader["phone_number"].ToString() }
@@ -134,123 +110,115 @@ static BsonArray GetUsersByGroup(string mysqlConnStr, string groupId)
             }
         }
     }
-    
+
     return users;
 }
 
-    static BsonArray GetExpensesByGroup(string mysqlConnStr, string groupId)
-    {
-        var expenses = new BsonArray();
+static BsonArray GetExpensesByGroup(string mysqlConnStr, string groupId) {
+    var expenses = new BsonArray();
 
-        using (var mysqlConn = new MySqlConnection(mysqlConnStr))
-        {
-            mysqlConn.Open();
-            string query = @"
+    using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
+        mysqlConn.Open();
+        string query = @"
             SELECT BIN_TO_UUID(e.id) as id, BIN_TO_UUID(e.ownerID) as ownerID, BIN_TO_UUID(e.groupID) as groupID, e.title, e.amount, e.date 
             FROM Expense e 
             JOIN Rel_Expense_Group reg ON e.id = reg.ID_Expense 
             WHERE reg.ID_Group = UUID_TO_BIN(@groupId);";
-        
-            using (var cmd = new MySqlCommand(query, mysqlConn))
-            {
-                cmd.Parameters.AddWithValue("@groupId", groupId);
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var expense = new BsonDocument
-                        {
-                            { "id", reader["id"].ToString() }
-                        };
-                        expenses.Add(expense);
-                    }
-                }
-            }
-        }
 
-        return expenses;
-    }
-/*
-    static void MigrateExpenses(string mysqlConnStr, string mongoConnStr, string mongoDatabase)
-    {
-        var mongoClient = new MongoClient(mongoConnStr);
-        var mongoDb = mongoClient.GetDatabase(mongoDatabase);
-        var expenseCollection = mongoDb.GetCollection<BsonDocument>("Expense");
-
-        using (var mysqlConn = new MySqlConnection(mysqlConnStr))
-        {
-            mysqlConn.Open();
-            string query = "SELECT * FROM Expense";
-            using (var cmd = new MySqlCommand(query, mysqlConn))
-            using (var reader = cmd.ExecuteReader())
-            {
-                var expenses = new List<BsonDocument>();
-                while (reader.Read())
-                {
-                    var expenseId = new Guid((byte[])reader["id"]).ToString();
-                    var ownerId = new Guid((byte[])reader["ownerID"]).ToString();
-                    var groupId = new Guid((byte[])reader["groupID"]).ToString();
-
-                    var expense = new BsonDocument
-                    {
-                        { "_id", expenseId },
-                        { "title", reader["title"].ToString() },
-                        { "amount", Convert.ToDecimal(reader["amount"]) },
-                        { "date", Convert.ToDateTime(reader["date"]) },
-                        { "owner", GetUserById(mysqlConnStr, ownerId) },
-                        { "group", GetGroupById(mysqlConnStr, groupId) }
+        using (var cmd = new MySqlCommand(query, mysqlConn)) {
+            cmd.Parameters.AddWithValue("@groupId", groupId);
+            using (var reader = cmd.ExecuteReader()) {
+                while (reader.Read()) {
+                    var expense = new BsonDocument {
+                        { "id", reader["id"].ToString() }
                     };
-
                     expenses.Add(expense);
                 }
-                expenseCollection.InsertMany(expenses);
             }
         }
     }
 
-    static BsonDocument GetUserById(string mysqlConnStr, string userId)
-    {
-        string query = $"SELECT * FROM User WHERE id = UNHEX(REPLACE('{userId}', '-', ''))";
-        using (var mysqlConn = new MySqlConnection(mysqlConnStr))
-        {
-            mysqlConn.Open();
-            using (var cmd = new MySqlCommand(query, mysqlConn))
-            using (var reader = cmd.ExecuteReader(CommandBehavior.SingleRow))
-            {
-                if (reader.Read())
-                {
-                    return new BsonDocument
-                    {
-                        { "user_id", userId },
+    return expenses;
+}
+
+static void MigrateExpenses(string mysqlConnStr, string mongoConnStr, string mongoDatabase) {
+    var mongoClient = new MongoClient(mongoConnStr);
+    var mongoDb = mongoClient.GetDatabase(mongoDatabase);
+    var expenseCollection = mongoDb.GetCollection<BsonDocument>("Expense");
+
+    using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
+        mysqlConn.Open();
+        string query =
+            "SELECT BIN_TO_UUID(id) as id, BIN_TO_UUID(ownerID) as ownerID, BIN_TO_UUID(groupID) as groupID, title, amount, date FROM Expense;";
+        using (var cmd = new MySqlCommand(query, mysqlConn))
+        using (var reader = cmd.ExecuteReader()) {
+            var expenses = new List<BsonDocument>();
+            while (reader.Read()) {
+                var expenseId = reader["id"].ToString();
+                var ownerId = reader["ownerID"].ToString();
+                var groupId = reader["groupID"].ToString();
+
+                var expense = new BsonDocument {
+                    { "_id", expenseId },
+                    { "title", reader["title"].ToString() },
+                    { "amount", Convert.ToDecimal(reader["amount"]) },
+                    { "date", Convert.ToDateTime(reader["date"]) },
+                    { "owner", GetUserById(mysqlConnStr, ownerId) },
+                    { "group", GetGroupById(mysqlConnStr, groupId) }
+                };
+
+                expenses.Add(expense);
+            }
+            expenseCollection.InsertMany(expenses);
+            Console.WriteLine("Expenses migrated successfully.");
+        }
+    }
+}
+
+static BsonDocument GetUserById(string mysqlConnStr, string userId) {
+    using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
+        mysqlConn.Open();
+        string query = @"
+            SELECT BIN_TO_UUID(id) as id, name, phone_number 
+            FROM User 
+            WHERE id = UUID_TO_BIN(@userId);";
+
+        using (var cmd = new MySqlCommand(query, mysqlConn)) {
+            cmd.Parameters.AddWithValue("@userId", userId);
+            using (var reader = cmd.ExecuteReader()) {
+                if (reader.Read()) {
+                    return new BsonDocument {
+                        { "id", reader["id"].ToString() },
                         { "name", reader["name"].ToString() },
                         { "phone_number", reader["phone_number"].ToString() }
                     };
                 }
             }
         }
-        return null;
     }
+    return null;
+}
 
-    static BsonDocument GetGroupById(string mysqlConnStr, string groupId)
-    {
-        string query = $"SELECT * FROM `Group` WHERE id = UNHEX(REPLACE('{groupId}', '-', ''))";
-        using (var mysqlConn = new MySqlConnection(mysqlConnStr))
-        {
-            mysqlConn.Open();
-            using (var cmd = new MySqlCommand(query, mysqlConn))
-            using (var reader = cmd.ExecuteReader(CommandBehavior.SingleRow))
-            {
-                if (reader.Read())
-                {
-                    return new BsonDocument
-                    {
-                        { "group_id", groupId },
+static BsonDocument GetGroupById(string mysqlConnStr, string groupId) {
+    using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
+        mysqlConn.Open();
+        string query = @"
+            SELECT BIN_TO_UUID(id) as id, name, token 
+            FROM `Group` 
+            WHERE id = UUID_TO_BIN(@groupId);";
+
+        using (var cmd = new MySqlCommand(query, mysqlConn)) {
+            cmd.Parameters.AddWithValue("@groupId", groupId);
+            using (var reader = cmd.ExecuteReader()) {
+                if (reader.Read()) {
+                    return new BsonDocument {
+                        { "id", reader["id"].ToString() },
                         { "name", reader["name"].ToString() },
                         { "token", reader["token"].ToString() }
                     };
                 }
             }
         }
-        return null;
     }
-*/
+    return null;
+}
