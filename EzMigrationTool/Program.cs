@@ -24,7 +24,7 @@ using (var mysqlConn = new MySqlConnection(mysqlConnStr))
     //MigrateUsers(mysqlConnStr, mongoConnStr, mongoDatabase);
 
     // Migrate Group table
-    //MigrateGroups(mysqlConnStr, mongoConnStr, mongoDatabase);
+    MigrateGroups(mysqlConnStr, mongoConnStr, mongoDatabase);
 
     // Migrate Expense table
     //MigrateExpenses(mysqlConnStr, mongoConnStr, mongoDatabase);
@@ -160,6 +160,7 @@ static void MigrateUsers(string mysqlConnStr, string mongoConnStr, string mongoD
         return expenses;
     }
 
+/*
     static void MigrateExpenses(string mysqlConnStr, string mongoConnStr, string mongoDatabase)
     {
         var mongoClient = new MongoClient(mongoConnStr);
@@ -242,3 +243,4 @@ static void MigrateUsers(string mysqlConnStr, string mongoConnStr, string mongoD
         }
         return null;
     }
+*/
