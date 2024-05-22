@@ -1,6 +1,5 @@
 ﻿// MySQL connection string
 
-using System.Data;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MySql.Data.MySqlClient;
@@ -95,7 +94,7 @@ static void MigrateGroups(string mysqlConnStr, string mongoConnStr, string mongo
             foreach (var group in groups)
             {
                 var groupId = group["_id"].ToString()!;
-                //group.Add("users", GetUsersByGroup(mysqlConnStr, groupId));
+                group.Add("users", GetUsersByGroup(mysqlConnStr, groupId));
                 group.Add("expenses", GetExpensesByGroup(mysqlConnStr, groupId));
             }
 
@@ -104,22 +103,29 @@ static void MigrateGroups(string mysqlConnStr, string mongoConnStr, string mongo
     }
 }
 
-    static BsonArray GetUsersByGroup(string mysqlConnStr, string groupId)
+static BsonArray GetUsersByGroup(string mysqlConnStr, string groupId)
+{
+    var users = new BsonArray();
+    
+    using (var mysqlConn = new MySqlConnection(mysqlConnStr))
     {
-        var users = new BsonArray();
-        string query = $"SELECT u.id, u.name, u.phone_number FROM User u JOIN Rel_User_Group rg ON u.id = rg.ID_User WHERE rg.ID_Group = UNHEX(REPLACE('{groupId}', '-', ''))";
+        mysqlConn.Open();
+        string query = @"
+            SELECT BIN_TO_UUID(u.id) as id, u.name, u.phone_number 
+            FROM User u 
+            JOIN Rel_User_Group rug ON u.id = rug.ID_User 
+            WHERE rug.ID_Group = UUID_TO_BIN(@groupId);";
 
-        using (var mysqlConn = new MySqlConnection(mysqlConnStr))
+        using (var cmd = new MySqlCommand(query, mysqlConn))
         {
-            mysqlConn.Open();
-            using (var cmd = new MySqlCommand(query, mysqlConn))
+            cmd.Parameters.AddWithValue("@groupId", groupId);
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
                     var user = new BsonDocument
                     {
-                        { "user_id", new Guid((byte[])reader["id"]).ToString() },
+                        { "user_id", reader["id"].ToString() },
                         { "name", reader["name"].ToString() },
                         { "phone_number", reader["phone_number"].ToString() }
                     };
@@ -127,10 +133,11 @@ static void MigrateGroups(string mysqlConnStr, string mongoConnStr, string mongo
                 }
             }
         }
-        return users;
     }
+    
+    return users;
+}
 
-// done it works
     static BsonArray GetExpensesByGroup(string mysqlConnStr, string groupId)
     {
         var expenses = new BsonArray();
