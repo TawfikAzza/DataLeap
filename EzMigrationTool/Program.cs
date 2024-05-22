@@ -40,7 +40,7 @@ using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
 
 
 static void MigrateTable(MySqlConnection mysqlConn, string mongoConnStr, string mongoDatabase, string tableName, string[] columns) {
-    string query = $"SELECT * FROM {tableName}";
+    var query = $"SELECT * FROM {tableName}";
     using (var cmd = new MySqlCommand(query, mysqlConn))
     using (var reader = cmd.ExecuteReader()) {
         var documents = new List<BsonDocument>();
