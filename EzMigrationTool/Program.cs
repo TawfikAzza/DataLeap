@@ -14,10 +14,11 @@ string mongoDatabase = "EZMoney_test";
 // Connect to MySQL
 using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
     mysqlConn.Open();
-    
-    MigrateUsers(mysqlConnStr, mongoConnStr, mongoDatabase);
-    MigrateGroups(mysqlConnStr, mongoConnStr, mongoDatabase);
-    MigrateExpenses(mysqlConnStr, mongoConnStr, mongoDatabase);
+
+    ExtractUsers(mysqlConnStr);
+    //MigrateUsers(mysqlConnStr, mongoConnStr, mongoDatabase);
+    //MigrateGroups(mysqlConnStr, mongoConnStr, mongoDatabase);
+    //MigrateExpenses(mysqlConnStr, mongoConnStr, mongoDatabase);
 
     Console.WriteLine("Data migration completed successfully.");
 }
@@ -46,6 +47,31 @@ static void MigrateUsers(string mysqlConnStr, string mongoConnStr, string mongoD
             }
             userCollection.InsertMany(users);
             Console.WriteLine("Users migrated successfully.");
+        }
+    }
+}
+
+static void ExtractUsers(string mysqlConnStr) {
+    using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
+        mysqlConn.Open();
+        string query = "SELECT * FROM User";
+        using (var cmd = new MySqlCommand(query, mysqlConn))
+        using (var reader = cmd.ExecuteReader()) {
+            var users = new List<BsonDocument>();
+            while (reader.Read()) {
+                var userId = new Guid((byte[])reader["id"]).ToString();
+                var user = new BsonDocument {
+                    { "_id", userId },
+                    { "name", reader["name"].ToString() },
+                    { "phone_number", reader["phone_number"].ToString() }
+                };
+                // Add the user to the BSON array
+                users.Add(user);
+            }
+            // Create a file in JSON that contains all the users
+            var usersJson = new BsonArray(users).ToJson();
+            File.WriteAllText("./users.json", usersJson);
+            Console.WriteLine("Users extracted successfully.");
         }
     }
 }
