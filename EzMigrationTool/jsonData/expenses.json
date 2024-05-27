@@ -1,0 +1,151 @@
+[{
+    "_id" : "e1bb189e-8bf9-4a3c-9912-ace4e6545001",
+    "title" : "Expense 1",
+    "amount" : "100.00",
+    "date" : "01/01/2023 00:00:00",
+    "owner" : {
+      "user_id" : "a3bb189e-8bf9-4a3c-9912-ace4e6543001",
+      "name" : "Alice",
+      "phone_number" : "123-456-7890"
+    },
+    "group" : {
+      "_id" : "a1bb189e-8bf9-4a3c-9912-ace4e6544001",
+      "name" : "Group A",
+      "token" : "tokenA"
+    }
+  }, {
+    "_id" : "e2bb189e-8bf9-4a3c-9912-ace4e6545002",
+    "title" : "Expense 2",
+    "amount" : "200.00",
+    "date" : "02/01/2023 00:00:00",
+    "owner" : {
+      "user_id" : "b3bb189e-8bf9-4a3c-9912-ace4e6543002",
+      "name" : "Bob",
+      "phone_number" : "234-567-8901"
+    },
+    "group" : {
+      "_id" : "b1bb189e-8bf9-4a3c-9912-ace4e6544002",
+      "name" : "Group B",
+      "token" : "tokenB"
+    }
+  }, {
+    "_id" : "e3bb189e-8bf9-4a3c-9912-ace4e6545003",
+    "title" : "Expense 3",
+    "amount" : "150.00",
+    "date" : "03/01/2023 00:00:00",
+    "owner" : {
+      "user_id" : "c3bb189e-8bf9-4a3c-9912-ace4e6543003",
+      "name" : "Charlie",
+      "phone_number" : "345-678-9012"
+    },
+    "group" : {
+      "_id" : "c1bb189e-8bf9-4a3c-9912-ace4e6544003",
+      "name" : "Group C",
+      "token" : "tokenC"
+    }
+  }, {
+    "_id" : "e4bb189e-8bf9-4a3c-9912-ace4e6545004",
+    "title" : "Expense 4",
+    "amount" : "50.00",
+    "date" : "04/01/2023 00:00:00",
+    "owner" : {
+      "user_id" : "d3bb189e-8bf9-4a3c-9912-ace4e6543004",
+      "name" : "David",
+      "phone_number" : "456-789-0123"
+    },
+    "group" : {
+      "_id" : "d1bb189e-8bf9-4a3c-9912-ace4e6544004",
+      "name" : "Group D",
+      "token" : "tokenD"
+    }
+  }, {
+    "_id" : "e5bb189e-8bf9-4a3c-9912-ace4e6545005",
+    "title" : "Expense 5",
+    "amount" : "300.00",
+    "date" : "05/01/2023 00:00:00",
+    "owner" : {
+      "user_id" : "e3bb189e-8bf9-4a3c-9912-ace4e6543005",
+      "name" : "Eve",
+      "phone_number" : "567-890-1234"
+    },
+    "group" : {
+      "_id" : "a1bb189e-8bf9-4a3c-9912-ace4e6544001",
+      "name" : "Group A",
+      "token" : "tokenA"
+    }
+  }, {
+    "_id" : "e6bb189e-8bf9-4a3c-9912-ace4e6545006",
+    "title" : "Expense 6",
+    "amount" : "75.00",
+    "date" : "06/01/2023 00:00:00",
+    "owner" : {
+      "user_id" : "f3bb189e-8bf9-4a3c-9912-ace4e6543006",
+      "name" : "Frank",
+      "phone_number" : "678-901-2345"
+    },
+    "group" : {
+      "_id" : "b1bb189e-8bf9-4a3c-9912-ace4e6544002",
+      "name" : "Group B",
+      "token" : "tokenB"
+    }
+  }, {
+    "_id" : "e7bb189e-8bf9-4a3c-9912-ace4e6545007",
+    "title" : "Expense 7",
+    "amount" : "400.00",
+    "date" : "07/01/2023 00:00:00",
+    "owner" : {
+      "user_id" : "a3bb189e-8bf9-4a3c-9912-ace4e6543007",
+      "name" : "Grace",
+      "phone_number" : "789-012-3456"
+    },
+    "group" : {
+      "_id" : "c1bb189e-8bf9-4a3c-9912-ace4e6544003",
+      "name" : "Group C",
+      "token" : "tokenC"
+    }
+  }, {
+    "_id" : "e8bb189e-8bf9-4a3c-9912-ace4e6545008",
+    "title" : "Expense 8",
+    "amount" : "250.00",
+    "date" : "08/01/2023 00:00:00",
+    "owner" : {
+      "user_id" : "b3bb189e-8bf9-4a3c-9912-ace4e6543008",
+      "name" : "Hank",
+      "phone_number" : "890-123-4567"
+    },
+    "group" : {
+      "_id" : "d1bb189e-8bf9-4a3c-9912-ace4e6544004",
+      "name" : "Group D",
+      "token" : "tokenD"
+    }
+  }, {
+    "_id" : "e9bb189e-8bf9-4a3c-9912-ace4e6545009",
+    "title" : "Expense 9",
+    "amount" : "500.00",
+    "date" : "09/01/2023 00:00:00",
+    "owner" : {
+      "user_id" : "c3bb189e-8bf9-4a3c-9912-ace4e6543009",
+      "name" : "Ivy",
+      "phone_number" : "901-234-5678"
+    },
+    "group" : {
+      "_id" : "a1bb189e-8bf9-4a3c-9912-ace4e6544001",
+      "name" : "Group A",
+      "token" : "tokenA"
+    }
+  }, {
+    "_id" : "eabb189e-8bf9-4a3c-9912-ace4e6545010",
+    "title" : "Expense 10",
+    "amount" : "125.00",
+    "date" : "10/01/2023 00:00:00",
+    "owner" : {
+      "user_id" : "d3bb189e-8bf9-4a3c-9912-ace4e6543010",
+      "name" : "Jack",
+      "phone_number" : "012-345-6789"
+    },
+    "group" : {
+      "_id" : "b1bb189e-8bf9-4a3c-9912-ace4e6544002",
+      "name" : "Group B",
+      "token" : "tokenB"
+    }
+  }]
