@@ -2,6 +2,9 @@
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
 using MySql.Data.MySqlClient;
+using Newtonsoft.Json;
+using JsonConvert = Newtonsoft.Json.JsonConvert;
+
 
 // MySQL connection string
 string mysqlConnStr = "server=localhost;user=root;database=EZMoney_test;password=rootpassword;";
@@ -19,10 +22,22 @@ using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
     ExtractUsers(mysqlConnStr);
     ExtractGroups(mysqlConnStr);
     ExtractExpenses(mysqlConnStr);
+
+    Console.WriteLine("Data extraction completed successfully.");
+    Console.WriteLine("Would you like to migrate the data to MongoDB? (y/n)");
+}
+
+var step2 = Console.ReadLine();
+
+if (step2 == "n") {
+    return;
+}
+
+using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
+    mysqlConn.Open();
     
-    //MigrateUsers(mysqlConnStr, mongoConnStr, mongoDatabase);
-    //MigrateGroups(mysqlConnStr, mongoConnStr, mongoDatabase);
-    //MigrateExpenses(mysqlConnStr, mongoConnStr, mongoDatabase);
+    InjectUsersToMongo(mongoConnStr, mongoDatabase);
+    InjectGroupsToMongo(mongoConnStr, mongoDatabase);
 
     Console.WriteLine("Data migration completed successfully.");
 }
@@ -37,7 +52,7 @@ static void ExtractUsers(string mysqlConnStr) {
             while (reader.Read()) {
                 var userId = new Guid((byte[])reader["id"]).ToString();
                 var user = new BsonDocument {
-                    { "_id", userId },
+                    { "user_id", userId },
                     { "name", reader["name"].ToString() },
                     { "phone_number", reader["phone_number"].ToString() }
                 };
@@ -140,6 +155,98 @@ static void SaveDataToFile(List<BsonDocument> document, string fileName) {
         Console.WriteLine("An error occurred while saving users to file: " + ex.Message);
     }
 }
+
+static void InjectUsersToMongo(string mongoConnStr, string mongoDatabase) {
+    // Create a MongoClient with the connection string
+    var mongoClient = new MongoClient(mongoConnStr);
+    
+    // Get the specified database
+    var mongoDb = mongoClient.GetDatabase(mongoDatabase);
+    
+    // Get the "User" collection (if it doesn't exist, it will be created)
+    var userCollection = mongoDb.GetCollection<BsonDocument>("User");
+    
+    // Navigate to the desired target directory relative to the current directory
+    string parentDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+    string targetDirectory = Path.Combine(parentDirectory, "jsonData");
+    
+    // Read the JSON file
+    var jsonFilePath = Path.Combine(targetDirectory, "users.json");
+    var jsonData = File.ReadAllText(jsonFilePath);
+
+    // Deserialize JSON data into a list of User objects
+    var users = JsonConvert.DeserializeObject<List<MongoUser>>(jsonData);
+    
+    // Convert the list of User objects to a list of BsonDocument
+    var bsonDocuments = new List<BsonDocument>();
+    foreach (var user in users)
+    {
+        var bsonDocument = new BsonDocument
+        {
+            { "user_id", user.user_id },
+            { "name", user.name },
+            { "phone_number", user.phone_number }
+        };
+        bsonDocuments.Add(bsonDocument);
+    }
+    
+    // Insert the BsonDocuments into the "User" collection
+    userCollection.InsertMany(bsonDocuments);
+    Console.WriteLine("Users migrated successfully.");
+}
+
+static void InjectGroupsToMongo(string mongoConnStr, string mongoDatabase) {
+    // Create a MongoClient with the connection string
+    var mongoClient = new MongoClient(mongoConnStr);
+    
+    // Get the specified database
+    var mongoDb = mongoClient.GetDatabase(mongoDatabase);
+    
+    // Get the "Group" collection (if it doesn't exist, it will be created)
+    var groupCollection = mongoDb.GetCollection<BsonDocument>("Group");
+    
+    // Navigate to the desired target directory relative to the current directory
+    string parentDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+    string targetDirectory = Path.Combine(parentDirectory, "jsonData");
+    
+    // Read the JSON file
+    var jsonFilePath = Path.Combine(targetDirectory, "groups.json");
+    var jsonData = File.ReadAllText(jsonFilePath);
+
+    // Deserialize JSON data into a list of Group objects
+    var groups = JsonConvert.DeserializeObject<List<MongoGroup>>(jsonData);
+    
+    // Convert the list of Group objects to a list of BsonDocument
+    var bsonDocuments = new List<BsonDocument>();
+    foreach (var group in groups)
+    {
+        var bsonDocument = new BsonDocument
+        {
+            { "_id", group._id },
+            { "name", group.name },
+            { "token", group.token },
+            { "users", new BsonArray(group.users.ConvertAll(user => new BsonDocument
+                {
+                    { "user_id", user.user_id },
+                    { "name", user.name },
+                    { "phone_number", user.phone_number }
+                }))
+            },
+            { "expenses", new BsonArray(group.expenses.ConvertAll(expense => new BsonDocument
+                {
+                    { "id", expense.id }
+                }))
+            }
+        };
+        bsonDocuments.Add(bsonDocument);
+    }
+    
+    // Insert the BsonDocuments into the "Group" collection
+    groupCollection.InsertMany(bsonDocuments);
+    Console.WriteLine("Groups migrated successfully.");
+}
+
+
 
 static void MigrateUsers(string mysqlConnStr, string mongoConnStr, string mongoDatabase) {
     var mongoClient = new MongoClient(mongoConnStr);
@@ -339,4 +446,25 @@ static BsonDocument GetGroupById(string mysqlConnStr, string groupId) {
         }
     }
     return null;
+}
+
+public class MongoUser
+{
+    public string user_id { get; set; }
+    public string name { get; set; }
+    public string phone_number { get; set; }
+}
+
+public class MongoExpense
+{
+    public string id { get; set; }
+}
+
+public class MongoGroup
+{
+    public string _id { get; set; }
+    public string name { get; set; }
+    public string token { get; set; }
+    public List<MongoUser> users { get; set; }
+    public List<MongoExpense> expenses { get; set; }
 }
