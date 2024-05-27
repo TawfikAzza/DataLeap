@@ -36,8 +36,8 @@ if (step2 == "n") {
 using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
     mysqlConn.Open();
     
-    //InjectUsersToMongo(mongoConnStr, mongoDatabase);
-    //InjectGroupsToMongo(mongoConnStr, mongoDatabase);
+    InjectUsersToMongo(mongoConnStr, mongoDatabase);
+    InjectGroupsToMongo(mongoConnStr, mongoDatabase);
     InjectExpensesToMongo(mongoConnStr, mongoDatabase);
 
     Console.WriteLine("Data migration completed successfully.");
@@ -60,6 +60,7 @@ static void ExtractUsers(string mysqlConnStr) {
                 // Add the user to the BSON array
                 users.Add(user);
             }
+            Console.WriteLine("User data extracted successfully.");
             SaveDataToFile(users, "users.json");
         }
     }
@@ -88,9 +89,9 @@ static void ExtractGroups(string mysqlConnStr) {
                 group.Add("users", GetUsersByGroup(mysqlConnStr, groupId));
                 group.Add("expenses", GetExpensesByGroup(mysqlConnStr, groupId));
             }
-
+            
+            Console.WriteLine("Groups data extracted successfully.");
             SaveDataToFile(groups, "groups.json");
-            Console.WriteLine("Groups migrated successfully.");
         }
     }
 }
@@ -119,8 +120,8 @@ static void ExtractExpenses(string mysqlConnStr) {
 
                 expenses.Add(expense);
             }
+            Console.WriteLine("Expenses data extracted successfully.");
             SaveDataToFile(expenses, "expenses.json");
-            Console.WriteLine("Expenses migrated successfully.");
         }
     }
 }
@@ -132,7 +133,6 @@ static void SaveDataToFile(List<BsonDocument> document, string fileName) {
 
         // Get the current working directory
         string currentDirectory = Environment.CurrentDirectory;
-        Console.WriteLine("Current Directory: " + currentDirectory);
 
         // Navigate to the desired target directory relative to the current directory
         string parentDirectory = Directory.GetParent(currentDirectory).Parent.Parent.FullName;
@@ -151,9 +151,9 @@ static void SaveDataToFile(List<BsonDocument> document, string fileName) {
             writer.Write(usersJson);
         }
 
-        Console.WriteLine("Users saved to file successfully.");
+        Console.WriteLine("Data saved to file successfully.");
     } catch (Exception ex) {
-        Console.WriteLine("An error occurred while saving users to file: " + ex.Message);
+        Console.WriteLine("An error occurred while saving data to file: " + ex.Message);
     }
 }
 
@@ -247,7 +247,8 @@ static void InjectGroupsToMongo(string mongoConnStr, string mongoDatabase) {
     Console.WriteLine("Groups migrated successfully.");
 }
 
-static void InjectExpensesToMongo(string mongoConnStr, string mongoDatabase) {
+static void InjectExpensesToMongo(string mongoConnStr, string mongoDatabase)
+{
     // Create a MongoClient with the connection string
     var mongoClient = new MongoClient(mongoConnStr);
     
@@ -263,7 +264,6 @@ static void InjectExpensesToMongo(string mongoConnStr, string mongoDatabase) {
     
     // Read the JSON file
     var jsonFilePath = Path.Combine(targetDirectory, "expenses.json");
-    Console.WriteLine(jsonFilePath);
     var jsonData = File.ReadAllText(jsonFilePath);
 
     // Deserialize JSON data into a list of Expense objects
@@ -275,22 +275,22 @@ static void InjectExpensesToMongo(string mongoConnStr, string mongoDatabase) {
     {
         var bsonDocument = new BsonDocument
         {
-            { "_id", expense._id },
-            { "title", expense.title },
-            { "amount", Convert.ToDecimal(expense.amount) },
-            { "date", Convert.ToDateTime(expense.date) },
+            { "_id", expense._id ?? throw new ArgumentNullException(nameof(expense._id)) },
+            { "title", expense.title ?? throw new ArgumentNullException(nameof(expense.title)) },
+            { "amount", expense.amount != null ? Convert.ToDecimal(expense.amount) : throw new ArgumentNullException(nameof(expense.amount)) },
+            { "date", DateTime.Parse(expense.date) },
             { "owner", new BsonDocument
                 {
-                    { "_id", expense.owner.user_id },
-                    { "name", expense.owner.name },
-                    { "phone_number", expense.owner.phone_number }
+                    { "id", expense.owner?.user_id ?? throw new ArgumentNullException(nameof(expense.owner.user_id)) },
+                    { "name", expense.owner?.name ?? throw new ArgumentNullException(nameof(expense.owner.name)) },
+                    { "phone_number", expense.owner?.phone_number ?? throw new ArgumentNullException(nameof(expense.owner.phone_number)) }
                 }
             },
             { "group", new BsonDocument
                 {
-                    { "_id", expense.group._id },
-                    { "name", expense.group.name },
-                    { "token", expense.group.token }
+                    { "id", expense.group?._id ?? throw new ArgumentNullException(nameof(expense.group._id)) },
+                    { "name", expense.group?.name ?? throw new ArgumentNullException(nameof(expense.group.name)) },
+                    { "token", expense.group?.token ?? throw new ArgumentNullException(nameof(expense.group.token)) }
                 }
             }
         };
@@ -301,6 +301,7 @@ static void InjectExpensesToMongo(string mongoConnStr, string mongoDatabase) {
     expenseCollection.InsertMany(bsonDocuments);
     Console.WriteLine("Expenses migrated successfully.");
 }
+
 
 
 static void MigrateUsers(string mysqlConnStr, string mongoConnStr, string mongoDatabase) {
@@ -468,7 +469,7 @@ static BsonDocument GetUserById(string mysqlConnStr, string userId) {
             using (var reader = cmd.ExecuteReader()) {
                 if (reader.Read()) {
                     return new BsonDocument {
-                        { "id", reader["id"].ToString() },
+                        { "user_id", reader["id"].ToString() },
                         { "name", reader["name"].ToString() },
                         { "phone_number", reader["phone_number"].ToString() }
                     };
@@ -492,7 +493,7 @@ static BsonDocument GetGroupById(string mysqlConnStr, string groupId) {
             using (var reader = cmd.ExecuteReader()) {
                 if (reader.Read()) {
                     return new BsonDocument {
-                        { "id", reader["id"].ToString() },
+                        { "_id", reader["id"].ToString() },
                         { "name", reader["name"].ToString() },
                         { "token", reader["token"].ToString() }
                     };
