@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Bson.IO;
 using MongoDB.Driver;
 using MySql.Data.MySqlClient;
 
@@ -75,15 +76,35 @@ static List<BsonDocument> ExtractUsers(string mysqlConnStr) {
 }
 
 static void SaveUsersToFile(List<BsonDocument> users) {
-    // Convert the list of BsonDocuments to a BsonArray and then to JSON
-    var usersJson = new BsonArray(users).ToJson();
+    try {
+        // Convert the list of BsonDocuments to a BsonArray and then to JSON
+        var usersJson = new BsonArray(users).ToJson(new JsonWriterSettings { Indent = true });
 
-    // Open a StreamWriter to write the JSON string to a file
-    using (var writer = new StreamWriter("users.json")) {
-        writer.Write(usersJson);
+        // Get the current working directory
+        string currentDirectory = Environment.CurrentDirectory;
+        Console.WriteLine("Current Directory: " + currentDirectory);
+
+        // Navigate to the desired target directory relative to the current directory
+        string parentDirectory = Directory.GetParent(currentDirectory).Parent.Parent.FullName;
+        string targetDirectory = Path.Combine(parentDirectory, "jsonData");
+
+        // Ensure the directory exists
+        if (!Directory.Exists(targetDirectory)) {
+            Directory.CreateDirectory(targetDirectory);
+        }
+
+        // Define the file path
+        string filePath = Path.Combine(targetDirectory, "users.json");
+
+        // Open a StreamWriter to write the JSON string to a file
+        using (var writer = new StreamWriter(filePath)) {
+            writer.Write(usersJson);
+        }
+
+        Console.WriteLine("Users saved to file successfully.");
+    } catch (Exception ex) {
+        Console.WriteLine("An error occurred while saving users to file: " + ex.Message);
     }
-
-    Console.WriteLine("Users saved to file successfully.");
 }
 
 
