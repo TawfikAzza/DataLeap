@@ -15,14 +15,130 @@ string mongoDatabase = "EZMoney_test";
 // Connect to MySQL
 using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
     mysqlConn.Open();
-
-    var users = ExtractUsers(mysqlConnStr);
-    SaveUsersToFile(users);
+    
+    ExtractUsers(mysqlConnStr);
+    ExtractGroups(mysqlConnStr);
+    ExtractExpenses(mysqlConnStr);
+    
     //MigrateUsers(mysqlConnStr, mongoConnStr, mongoDatabase);
     //MigrateGroups(mysqlConnStr, mongoConnStr, mongoDatabase);
     //MigrateExpenses(mysqlConnStr, mongoConnStr, mongoDatabase);
 
     Console.WriteLine("Data migration completed successfully.");
+}
+
+static void ExtractUsers(string mysqlConnStr) {
+    using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
+        mysqlConn.Open();
+        string query = "SELECT * FROM User";
+        using (var cmd = new MySqlCommand(query, mysqlConn))
+        using (var reader = cmd.ExecuteReader()) {
+            var users = new List<BsonDocument>();
+            while (reader.Read()) {
+                var userId = new Guid((byte[])reader["id"]).ToString();
+                var user = new BsonDocument {
+                    { "_id", userId },
+                    { "name", reader["name"].ToString() },
+                    { "phone_number", reader["phone_number"].ToString() }
+                };
+                // Add the user to the BSON array
+                users.Add(user);
+            }
+            SaveDataToFile(users, "users.json");
+        }
+    }
+}
+
+static void ExtractGroups(string mysqlConnStr) {
+    using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
+        mysqlConn.Open();
+        string query = "SELECT BIN_TO_UUID(id) as id, name, token FROM `Group`;";
+        using (var cmd = new MySqlCommand(query, mysqlConn))
+        using (var reader = cmd.ExecuteReader()) {
+            var groups = new List<BsonDocument>();
+            while (reader.Read()) {
+                var groupId = reader["id"].ToString();
+                var group = new BsonDocument {
+                    { "_id", groupId },
+                    { "name", reader["name"].ToString() },
+                    { "token", reader["token"].ToString() }
+                };
+
+                groups.Add(group);
+            }
+
+            foreach (var group in groups) {
+                var groupId = group["_id"].ToString()!;
+                group.Add("users", GetUsersByGroup(mysqlConnStr, groupId));
+                group.Add("expenses", GetExpensesByGroup(mysqlConnStr, groupId));
+            }
+
+            SaveDataToFile(groups, "groups.json");
+            Console.WriteLine("Groups migrated successfully.");
+        }
+    }
+}
+
+static void ExtractExpenses(string mysqlConnStr) {
+    using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
+        mysqlConn.Open();
+        string query =
+            "SELECT BIN_TO_UUID(id) as id, BIN_TO_UUID(ownerID) as ownerID, BIN_TO_UUID(groupID) as groupID, title, amount, date FROM Expense;";
+        using (var cmd = new MySqlCommand(query, mysqlConn))
+        using (var reader = cmd.ExecuteReader()) {
+            var expenses = new List<BsonDocument>();
+            while (reader.Read()) {
+                var expenseId = reader["id"].ToString();
+                var ownerId = reader["ownerID"].ToString();
+                var groupId = reader["groupID"].ToString();
+
+                var expense = new BsonDocument {
+                    { "_id", expenseId },
+                    { "title", reader["title"].ToString() },
+                    { "amount", Convert.ToDecimal(reader["amount"]) },
+                    { "date", Convert.ToDateTime(reader["date"]) },
+                    { "owner", GetUserById(mysqlConnStr, ownerId) },
+                    { "group", GetGroupById(mysqlConnStr, groupId) }
+                };
+
+                expenses.Add(expense);
+            }
+            SaveDataToFile(expenses, "expenses.json");
+            Console.WriteLine("Expenses migrated successfully.");
+        }
+    }
+}
+
+static void SaveDataToFile(List<BsonDocument> document, string fileName) {
+    try {
+        // Convert the list of BsonDocuments to a BsonArray and then to JSON
+        var usersJson = new BsonArray(document).ToJson(new JsonWriterSettings { Indent = true });
+
+        // Get the current working directory
+        string currentDirectory = Environment.CurrentDirectory;
+        Console.WriteLine("Current Directory: " + currentDirectory);
+
+        // Navigate to the desired target directory relative to the current directory
+        string parentDirectory = Directory.GetParent(currentDirectory).Parent.Parent.FullName;
+        string targetDirectory = Path.Combine(parentDirectory, "jsonData");
+
+        // Ensure the directory exists
+        if (!Directory.Exists(targetDirectory)) {
+            Directory.CreateDirectory(targetDirectory);
+        }
+
+        // Define the file path
+        string filePath = Path.Combine(targetDirectory, fileName);
+
+        // Open a StreamWriter to write the JSON string to a file
+        using (var writer = new StreamWriter(filePath)) {
+            writer.Write(usersJson);
+        }
+
+        Console.WriteLine("Users saved to file successfully.");
+    } catch (Exception ex) {
+        Console.WriteLine("An error occurred while saving users to file: " + ex.Message);
+    }
 }
 
 static void MigrateUsers(string mysqlConnStr, string mongoConnStr, string mongoDatabase) {
@@ -52,61 +168,6 @@ static void MigrateUsers(string mysqlConnStr, string mongoConnStr, string mongoD
         }
     }
 }
-
-static List<BsonDocument> ExtractUsers(string mysqlConnStr) {
-    using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
-        mysqlConn.Open();
-        string query = "SELECT * FROM User";
-        using (var cmd = new MySqlCommand(query, mysqlConn))
-        using (var reader = cmd.ExecuteReader()) {
-            var users = new List<BsonDocument>();
-            while (reader.Read()) {
-                var userId = new Guid((byte[])reader["id"]).ToString();
-                var user = new BsonDocument {
-                    { "_id", userId },
-                    { "name", reader["name"].ToString() },
-                    { "phone_number", reader["phone_number"].ToString() }
-                };
-                // Add the user to the BSON array
-                users.Add(user);
-            }
-            return users;
-        }
-    }
-}
-
-static void SaveUsersToFile(List<BsonDocument> users) {
-    try {
-        // Convert the list of BsonDocuments to a BsonArray and then to JSON
-        var usersJson = new BsonArray(users).ToJson(new JsonWriterSettings { Indent = true });
-
-        // Get the current working directory
-        string currentDirectory = Environment.CurrentDirectory;
-        Console.WriteLine("Current Directory: " + currentDirectory);
-
-        // Navigate to the desired target directory relative to the current directory
-        string parentDirectory = Directory.GetParent(currentDirectory).Parent.Parent.FullName;
-        string targetDirectory = Path.Combine(parentDirectory, "jsonData");
-
-        // Ensure the directory exists
-        if (!Directory.Exists(targetDirectory)) {
-            Directory.CreateDirectory(targetDirectory);
-        }
-
-        // Define the file path
-        string filePath = Path.Combine(targetDirectory, "users.json");
-
-        // Open a StreamWriter to write the JSON string to a file
-        using (var writer = new StreamWriter(filePath)) {
-            writer.Write(usersJson);
-        }
-
-        Console.WriteLine("Users saved to file successfully.");
-    } catch (Exception ex) {
-        Console.WriteLine("An error occurred while saving users to file: " + ex.Message);
-    }
-}
-
 
 static void MigrateGroups(string mysqlConnStr, string mongoConnStr, string mongoDatabase) {
     var mongoClient = new MongoClient(mongoConnStr);

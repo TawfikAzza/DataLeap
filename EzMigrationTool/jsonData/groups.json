@@ -1,0 +1,65 @@
+[{
+    "_id" : "a1bb189e-8bf9-4a3c-9912-ace4e6544001",
+    "name" : "Group A",
+    "token" : "tokenA",
+    "users" : [{
+        "user_id" : "a3bb189e-8bf9-4a3c-9912-ace4e6543001",
+        "name" : "Alice",
+        "phone_number" : "123-456-7890"
+      }, {
+        "user_id" : "b3bb189e-8bf9-4a3c-9912-ace4e6543002",
+        "name" : "Bob",
+        "phone_number" : "234-567-8901"
+      }],
+    "expenses" : [{
+        "id" : "e1bb189e-8bf9-4a3c-9912-ace4e6545001"
+      }, {
+        "id" : "e5bb189e-8bf9-4a3c-9912-ace4e6545005"
+      }, {
+        "id" : "e9bb189e-8bf9-4a3c-9912-ace4e6545009"
+      }]
+  }, {
+    "_id" : "b1bb189e-8bf9-4a3c-9912-ace4e6544002",
+    "name" : "Group B",
+    "token" : "tokenB",
+    "users" : [{
+        "user_id" : "c3bb189e-8bf9-4a3c-9912-ace4e6543003",
+        "name" : "Charlie",
+        "phone_number" : "345-678-9012"
+      }, {
+        "user_id" : "d3bb189e-8bf9-4a3c-9912-ace4e6543004",
+        "name" : "David",
+        "phone_number" : "456-789-0123"
+      }],
+    "expenses" : [{
+        "id" : "e2bb189e-8bf9-4a3c-9912-ace4e6545002"
+      }, {
+        "id" : "e6bb189e-8bf9-4a3c-9912-ace4e6545006"
+      }, {
+        "id" : "eabb189e-8bf9-4a3c-9912-ace4e6545010"
+      }]
+  }, {
+    "_id" : "c1bb189e-8bf9-4a3c-9912-ace4e6544003",
+    "name" : "Group C",
+    "token" : "tokenC",
+    "users" : [{
+        "user_id" : "e3bb189e-8bf9-4a3c-9912-ace4e6543005",
+        "name" : "Eve",
+        "phone_number" : "567-890-1234"
+      }],
+    "expenses" : [{
+        "id" : "e3bb189e-8bf9-4a3c-9912-ace4e6545003"
+      }, {
+        "id" : "e7bb189e-8bf9-4a3c-9912-ace4e6545007"
+      }]
+  }, {
+    "_id" : "d1bb189e-8bf9-4a3c-9912-ace4e6544004",
+    "name" : "Group D",
+    "token" : "tokenD",
+    "users" : [],
+    "expenses" : [{
+        "id" : "e4bb189e-8bf9-4a3c-9912-ace4e6545004"
+      }, {
+        "id" : "e8bb189e-8bf9-4a3c-9912-ace4e6545008"
+      }]
+  }]

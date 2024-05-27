@@ -1,0 +1,151 @@
+[{
+    "_id" : "e1bb189e-8bf9-4a3c-9912-ace4e6545001",
+    "title" : "Expense 1",
+    "amount" : NumberDecimal("100.00"),
+    "date" : ISODate("2022-12-31T23:00:00Z"),
+    "owner" : {
+      "id" : "a3bb189e-8bf9-4a3c-9912-ace4e6543001",
+      "name" : "Alice",
+      "phone_number" : "123-456-7890"
+    },
+    "group" : {
+      "id" : "a1bb189e-8bf9-4a3c-9912-ace4e6544001",
+      "name" : "Group A",
+      "token" : "tokenA"
+    }
+  }, {
+    "_id" : "e2bb189e-8bf9-4a3c-9912-ace4e6545002",
+    "title" : "Expense 2",
+    "amount" : NumberDecimal("200.00"),
+    "date" : ISODate("2023-01-01T23:00:00Z"),
+    "owner" : {
+      "id" : "b3bb189e-8bf9-4a3c-9912-ace4e6543002",
+      "name" : "Bob",
+      "phone_number" : "234-567-8901"
+    },
+    "group" : {
+      "id" : "b1bb189e-8bf9-4a3c-9912-ace4e6544002",
+      "name" : "Group B",
+      "token" : "tokenB"
+    }
+  }, {
+    "_id" : "e3bb189e-8bf9-4a3c-9912-ace4e6545003",
+    "title" : "Expense 3",
+    "amount" : NumberDecimal("150.00"),
+    "date" : ISODate("2023-01-02T23:00:00Z"),
+    "owner" : {
+      "id" : "c3bb189e-8bf9-4a3c-9912-ace4e6543003",
+      "name" : "Charlie",
+      "phone_number" : "345-678-9012"
+    },
+    "group" : {
+      "id" : "c1bb189e-8bf9-4a3c-9912-ace4e6544003",
+      "name" : "Group C",
+      "token" : "tokenC"
+    }
+  }, {
+    "_id" : "e4bb189e-8bf9-4a3c-9912-ace4e6545004",
+    "title" : "Expense 4",
+    "amount" : NumberDecimal("50.00"),
+    "date" : ISODate("2023-01-03T23:00:00Z"),
+    "owner" : {
+      "id" : "d3bb189e-8bf9-4a3c-9912-ace4e6543004",
+      "name" : "David",
+      "phone_number" : "456-789-0123"
+    },
+    "group" : {
+      "id" : "d1bb189e-8bf9-4a3c-9912-ace4e6544004",
+      "name" : "Group D",
+      "token" : "tokenD"
+    }
+  }, {
+    "_id" : "e5bb189e-8bf9-4a3c-9912-ace4e6545005",
+    "title" : "Expense 5",
+    "amount" : NumberDecimal("300.00"),
+    "date" : ISODate("2023-01-04T23:00:00Z"),
+    "owner" : {
+      "id" : "e3bb189e-8bf9-4a3c-9912-ace4e6543005",
+      "name" : "Eve",
+      "phone_number" : "567-890-1234"
+    },
+    "group" : {
+      "id" : "a1bb189e-8bf9-4a3c-9912-ace4e6544001",
+      "name" : "Group A",
+      "token" : "tokenA"
+    }
+  }, {
+    "_id" : "e6bb189e-8bf9-4a3c-9912-ace4e6545006",
+    "title" : "Expense 6",
+    "amount" : NumberDecimal("75.00"),
+    "date" : ISODate("2023-01-05T23:00:00Z"),
+    "owner" : {
+      "id" : "f3bb189e-8bf9-4a3c-9912-ace4e6543006",
+      "name" : "Frank",
+      "phone_number" : "678-901-2345"
+    },
+    "group" : {
+      "id" : "b1bb189e-8bf9-4a3c-9912-ace4e6544002",
+      "name" : "Group B",
+      "token" : "tokenB"
+    }
+  }, {
+    "_id" : "e7bb189e-8bf9-4a3c-9912-ace4e6545007",
+    "title" : "Expense 7",
+    "amount" : NumberDecimal("400.00"),
+    "date" : ISODate("2023-01-06T23:00:00Z"),
+    "owner" : {
+      "id" : "a3bb189e-8bf9-4a3c-9912-ace4e6543007",
+      "name" : "Grace",
+      "phone_number" : "789-012-3456"
+    },
+    "group" : {
+      "id" : "c1bb189e-8bf9-4a3c-9912-ace4e6544003",
+      "name" : "Group C",
+      "token" : "tokenC"
+    }
+  }, {
+    "_id" : "e8bb189e-8bf9-4a3c-9912-ace4e6545008",
+    "title" : "Expense 8",
+    "amount" : NumberDecimal("250.00"),
+    "date" : ISODate("2023-01-07T23:00:00Z"),
+    "owner" : {
+      "id" : "b3bb189e-8bf9-4a3c-9912-ace4e6543008",
+      "name" : "Hank",
+      "phone_number" : "890-123-4567"
+    },
+    "group" : {
+      "id" : "d1bb189e-8bf9-4a3c-9912-ace4e6544004",
+      "name" : "Group D",
+      "token" : "tokenD"
+    }
+  }, {
+    "_id" : "e9bb189e-8bf9-4a3c-9912-ace4e6545009",
+    "title" : "Expense 9",
+    "amount" : NumberDecimal("500.00"),
+    "date" : ISODate("2023-01-08T23:00:00Z"),
+    "owner" : {
+      "id" : "c3bb189e-8bf9-4a3c-9912-ace4e6543009",
+      "name" : "Ivy",
+      "phone_number" : "901-234-5678"
+    },
+    "group" : {
+      "id" : "a1bb189e-8bf9-4a3c-9912-ace4e6544001",
+      "name" : "Group A",
+      "token" : "tokenA"
+    }
+  }, {
+    "_id" : "eabb189e-8bf9-4a3c-9912-ace4e6545010",
+    "title" : "Expense 10",
+    "amount" : NumberDecimal("125.00"),
+    "date" : ISODate("2023-01-09T23:00:00Z"),
+    "owner" : {
+      "id" : "d3bb189e-8bf9-4a3c-9912-ace4e6543010",
+      "name" : "Jack",
+      "phone_number" : "012-345-6789"
+    },
+    "group" : {
+      "id" : "b1bb189e-8bf9-4a3c-9912-ace4e6544002",
+      "name" : "Group B",
+      "token" : "tokenB"
+    }
+  }]
