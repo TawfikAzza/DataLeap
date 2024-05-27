@@ -15,7 +15,8 @@ string mongoDatabase = "EZMoney_test";
 using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
     mysqlConn.Open();
 
-    ExtractUsers(mysqlConnStr);
+    var users = ExtractUsers(mysqlConnStr);
+    SaveUsersToFile(users);
     //MigrateUsers(mysqlConnStr, mongoConnStr, mongoDatabase);
     //MigrateGroups(mysqlConnStr, mongoConnStr, mongoDatabase);
     //MigrateExpenses(mysqlConnStr, mongoConnStr, mongoDatabase);
@@ -51,7 +52,7 @@ static void MigrateUsers(string mysqlConnStr, string mongoConnStr, string mongoD
     }
 }
 
-static void ExtractUsers(string mysqlConnStr) {
+static List<BsonDocument> ExtractUsers(string mysqlConnStr) {
     using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
         mysqlConn.Open();
         string query = "SELECT * FROM User";
@@ -68,12 +69,21 @@ static void ExtractUsers(string mysqlConnStr) {
                 // Add the user to the BSON array
                 users.Add(user);
             }
-            // Create a file in JSON that contains all the users
-            var usersJson = new BsonArray(users).ToJson();
-            File.WriteAllText("./users.json", usersJson);
-            Console.WriteLine("Users extracted successfully.");
+            return users;
         }
     }
+}
+
+static void SaveUsersToFile(List<BsonDocument> users) {
+    // Convert the list of BsonDocuments to a BsonArray and then to JSON
+    var usersJson = new BsonArray(users).ToJson();
+
+    // Open a StreamWriter to write the JSON string to a file
+    using (var writer = new StreamWriter("users.json")) {
+        writer.Write(usersJson);
+    }
+
+    Console.WriteLine("Users saved to file successfully.");
 }
 
 
