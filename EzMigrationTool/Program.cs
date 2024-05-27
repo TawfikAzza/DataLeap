@@ -36,8 +36,9 @@ if (step2 == "n") {
 using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
     mysqlConn.Open();
     
-    InjectUsersToMongo(mongoConnStr, mongoDatabase);
-    InjectGroupsToMongo(mongoConnStr, mongoDatabase);
+    //InjectUsersToMongo(mongoConnStr, mongoDatabase);
+    //InjectGroupsToMongo(mongoConnStr, mongoDatabase);
+    InjectExpensesToMongo(mongoConnStr, mongoDatabase);
 
     Console.WriteLine("Data migration completed successfully.");
 }
@@ -110,8 +111,8 @@ static void ExtractExpenses(string mysqlConnStr) {
                 var expense = new BsonDocument {
                     { "_id", expenseId },
                     { "title", reader["title"].ToString() },
-                    { "amount", Convert.ToDecimal(reader["amount"]) },
-                    { "date", Convert.ToDateTime(reader["date"]) },
+                    { "amount", reader["amount"].ToString() },
+                    { "date", reader["date"].ToString() },
                     { "owner", GetUserById(mysqlConnStr, ownerId) },
                     { "group", GetGroupById(mysqlConnStr, groupId) }
                 };
@@ -234,7 +235,7 @@ static void InjectGroupsToMongo(string mongoConnStr, string mongoDatabase) {
             },
             { "expenses", new BsonArray(group.expenses.ConvertAll(expense => new BsonDocument
                 {
-                    { "id", expense.id }
+                    { "id", expense._id}
                 }))
             }
         };
@@ -246,6 +247,60 @@ static void InjectGroupsToMongo(string mongoConnStr, string mongoDatabase) {
     Console.WriteLine("Groups migrated successfully.");
 }
 
+static void InjectExpensesToMongo(string mongoConnStr, string mongoDatabase) {
+    // Create a MongoClient with the connection string
+    var mongoClient = new MongoClient(mongoConnStr);
+    
+    // Get the specified database
+    var mongoDb = mongoClient.GetDatabase(mongoDatabase);
+    
+    // Get the "Expense" collection (if it doesn't exist, it will be created)
+    var expenseCollection = mongoDb.GetCollection<BsonDocument>("Expense");
+    
+    // Navigate to the desired target directory relative to the current directory
+    string parentDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+    string targetDirectory = Path.Combine(parentDirectory, "jsonData");
+    
+    // Read the JSON file
+    var jsonFilePath = Path.Combine(targetDirectory, "expenses.json");
+    Console.WriteLine(jsonFilePath);
+    var jsonData = File.ReadAllText(jsonFilePath);
+
+    // Deserialize JSON data into a list of Expense objects
+    var expenses = JsonConvert.DeserializeObject<List<MongoExpense>>(jsonData);
+    
+    // Convert the list of Expense objects to a list of BsonDocument
+    var bsonDocuments = new List<BsonDocument>();
+    foreach (var expense in expenses)
+    {
+        var bsonDocument = new BsonDocument
+        {
+            { "_id", expense._id },
+            { "title", expense.title },
+            { "amount", Convert.ToDecimal(expense.amount) },
+            { "date", Convert.ToDateTime(expense.date) },
+            { "owner", new BsonDocument
+                {
+                    { "_id", expense.owner.user_id },
+                    { "name", expense.owner.name },
+                    { "phone_number", expense.owner.phone_number }
+                }
+            },
+            { "group", new BsonDocument
+                {
+                    { "_id", expense.group._id },
+                    { "name", expense.group.name },
+                    { "token", expense.group.token }
+                }
+            }
+        };
+        bsonDocuments.Add(bsonDocument);
+    }
+    
+    // Insert the BsonDocuments into the "Expense" collection
+    expenseCollection.InsertMany(bsonDocuments);
+    Console.WriteLine("Expenses migrated successfully.");
+}
 
 
 static void MigrateUsers(string mysqlConnStr, string mongoConnStr, string mongoDatabase) {
@@ -355,7 +410,7 @@ static BsonArray GetExpensesByGroup(string mysqlConnStr, string groupId) {
             using (var reader = cmd.ExecuteReader()) {
                 while (reader.Read()) {
                     var expense = new BsonDocument {
-                        { "id", reader["id"].ToString() }
+                        { "_id", reader["id"].ToString() }
                     };
                     expenses.Add(expense);
                 }
@@ -457,7 +512,12 @@ public class MongoUser
 
 public class MongoExpense
 {
-    public string id { get; set; }
+    public string _id { get; set; }
+    public string title { get; set; }
+    public string amount { get; set; }
+    public string date { get; set; }
+    public MongoUser owner { get; set; }
+    public MongoGroup group { get; set; }
 }
 
 public class MongoGroup
