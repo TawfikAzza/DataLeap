@@ -5,6 +5,14 @@
     {
       "Name": "Find User by Id",
       "Query": "queries/find_user_by_id.mysql.sql"
+    },
+    {
+      "Name": "Find Expense by Id",
+      "Query": "queries/find_expense_by_id.mysql.sql"
+    },
+    {
+      "Name": "Find Group by Id",
+      "Query": "queries/find_group_by_id.mysql.sql"
     }
   ]
 }
