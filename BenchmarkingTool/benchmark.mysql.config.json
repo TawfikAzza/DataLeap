@@ -1,0 +1,10 @@
+{
+  "Name": "MySQL queries",
+  "DatabaseType": "MySQL",
+  "Queries": [
+    {
+      "Name": "Find User by Id",
+      "Query": "queries/find_user_by_id.mysql.sql"
+    }
+  ]
+}

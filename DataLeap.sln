@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzMigrationTool", "EzMigrat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrityTest", "IntegrityTest\IntegrityTest.csproj", "{7B84A12D-E085-4447-9D94-9C4BBFDD52FA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BenchmarkingTool", "BenchmarkingTool\BenchmarkingTool.csproj", "{187F7E22-0208-41C7-8020-28A563ED1764}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{7B84A12D-E085-4447-9D94-9C4BBFDD52FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B84A12D-E085-4447-9D94-9C4BBFDD52FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B84A12D-E085-4447-9D94-9C4BBFDD52FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{187F7E22-0208-41C7-8020-28A563ED1764}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{187F7E22-0208-41C7-8020-28A563ED1764}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{187F7E22-0208-41C7-8020-28A563ED1764}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{187F7E22-0208-41C7-8020-28A563ED1764}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
