@@ -12,9 +12,9 @@ var fileService = FileService.GetInstance();
 
 // ------------ Start ------------
 
-Console.WriteLine("-----------------------------------------------------------");
-Console.WriteLine("Welcome to DataLeap, your trustworthy data migration tool.");
-Console.WriteLine("-----------------------------------------------------------");
+Console.WriteLine("------------------------------------------------------------------");
+Console.WriteLine("Welcome to EzMigrationTool, your trustworthy data migration tool.");
+Console.WriteLine("------------------------------------------------------------------");
 
 // Extract data from MySQL
 
