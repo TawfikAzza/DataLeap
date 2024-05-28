@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigrationService", "MigrationService\MigrationService.csproj", "{EC4DCC05-A13D-4309-8861-F66EDE046F7D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzMigrationTool", "EzMigrationTool\EzMigrationTool.csproj", "{98B38E31-BC33-4251-86DF-1C3EE4F4D681}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrityTest", "IntegrityTest\IntegrityTest.csproj", "{7B84A12D-E085-4447-9D94-9C4BBFDD52FA}"
@@ -12,10 +10,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EC4DCC05-A13D-4309-8861-F66EDE046F7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EC4DCC05-A13D-4309-8861-F66EDE046F7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EC4DCC05-A13D-4309-8861-F66EDE046F7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EC4DCC05-A13D-4309-8861-F66EDE046F7D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{98B38E31-BC33-4251-86DF-1C3EE4F4D681}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{98B38E31-BC33-4251-86DF-1C3EE4F4D681}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98B38E31-BC33-4251-86DF-1C3EE4F4D681}.Release|Any CPU.ActiveCfg = Release|Any CPU

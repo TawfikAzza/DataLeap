@@ -2,7 +2,6 @@
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
 using MySql.Data.MySqlClient;
-using Newtonsoft.Json;
 using JsonConvert = Newtonsoft.Json.JsonConvert;
 
 
@@ -18,7 +17,7 @@ string mongoDatabase = "EZMoney_test";
 // Connect to MySQL
 using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
     mysqlConn.Open();
-    
+
     ExtractUsers(mysqlConnStr);
     ExtractGroups(mysqlConnStr);
     ExtractExpenses(mysqlConnStr);
@@ -35,7 +34,7 @@ if (step2 == "n") {
 
 using (var mysqlConn = new MySqlConnection(mysqlConnStr)) {
     mysqlConn.Open();
-    
+
     InjectUsersToMongo(mongoConnStr, mongoDatabase);
     InjectGroupsToMongo(mongoConnStr, mongoDatabase);
     InjectExpensesToMongo(mongoConnStr, mongoDatabase);
@@ -89,7 +88,7 @@ static void ExtractGroups(string mysqlConnStr) {
                 group.Add("users", GetUsersByGroup(mysqlConnStr, groupId));
                 group.Add("expenses", GetExpensesByGroup(mysqlConnStr, groupId));
             }
-            
+
             Console.WriteLine("Groups data extracted successfully.");
             SaveDataToFile(groups, "groups.json");
         }
@@ -152,7 +151,8 @@ static void SaveDataToFile(List<BsonDocument> document, string fileName) {
         }
 
         Console.WriteLine("Data saved to file successfully.");
-    } catch (Exception ex) {
+    }
+    catch (Exception ex) {
         Console.WriteLine("An error occurred while saving data to file: " + ex.Message);
     }
 }
@@ -160,37 +160,35 @@ static void SaveDataToFile(List<BsonDocument> document, string fileName) {
 static void InjectUsersToMongo(string mongoConnStr, string mongoDatabase) {
     // Create a MongoClient with the connection string
     var mongoClient = new MongoClient(mongoConnStr);
-    
+
     // Get the specified database
     var mongoDb = mongoClient.GetDatabase(mongoDatabase);
-    
+
     // Get the "User" collection (if it doesn't exist, it will be created)
     var userCollection = mongoDb.GetCollection<BsonDocument>("User");
-    
+
     // Navigate to the desired target directory relative to the current directory
     string parentDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
     string targetDirectory = Path.Combine(parentDirectory, "jsonData");
-    
+
     // Read the JSON file
     var jsonFilePath = Path.Combine(targetDirectory, "users.json");
     var jsonData = File.ReadAllText(jsonFilePath);
 
     // Deserialize JSON data into a list of User objects
     var users = JsonConvert.DeserializeObject<List<MongoUser>>(jsonData);
-    
+
     // Convert the list of User objects to a list of BsonDocument
     var bsonDocuments = new List<BsonDocument>();
-    foreach (var user in users)
-    {
-        var bsonDocument = new BsonDocument
-        {
+    foreach (var user in users) {
+        var bsonDocument = new BsonDocument {
             { "user_id", user.user_id },
             { "name", user.name },
             { "phone_number", user.phone_number }
         };
         bsonDocuments.Add(bsonDocument);
     }
-    
+
     // Insert the BsonDocuments into the "User" collection
     userCollection.InsertMany(bsonDocuments);
     Console.WriteLine("Users migrated successfully.");
@@ -199,95 +197,88 @@ static void InjectUsersToMongo(string mongoConnStr, string mongoDatabase) {
 static void InjectGroupsToMongo(string mongoConnStr, string mongoDatabase) {
     // Create a MongoClient with the connection string
     var mongoClient = new MongoClient(mongoConnStr);
-    
+
     // Get the specified database
     var mongoDb = mongoClient.GetDatabase(mongoDatabase);
-    
+
     // Get the "Group" collection (if it doesn't exist, it will be created)
     var groupCollection = mongoDb.GetCollection<BsonDocument>("Group");
-    
+
     // Navigate to the desired target directory relative to the current directory
     string parentDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
     string targetDirectory = Path.Combine(parentDirectory, "jsonData");
-    
+
     // Read the JSON file
     var jsonFilePath = Path.Combine(targetDirectory, "groups.json");
     var jsonData = File.ReadAllText(jsonFilePath);
 
     // Deserialize JSON data into a list of Group objects
     var groups = JsonConvert.DeserializeObject<List<MongoGroup>>(jsonData);
-    
+
     // Convert the list of Group objects to a list of BsonDocument
     var bsonDocuments = new List<BsonDocument>();
-    foreach (var group in groups)
-    {
-        var bsonDocument = new BsonDocument
-        {
+    foreach (var group in groups) {
+        var bsonDocument = new BsonDocument {
             { "_id", group._id },
             { "name", group.name },
-            { "token", group.token },
-            { "users", new BsonArray(group.users.ConvertAll(user => new BsonDocument
-                {
+            { "token", group.token }, {
+                "users", new BsonArray(group.users.ConvertAll(user => new BsonDocument {
                     { "user_id", user.user_id },
                     { "name", user.name },
                     { "phone_number", user.phone_number }
                 }))
-            },
-            { "expenses", new BsonArray(group.expenses.ConvertAll(expense => new BsonDocument
-                {
-                    { "id", expense._id}
+            }, {
+                "expenses", new BsonArray(group.expenses.ConvertAll(expense => new BsonDocument {
+                    { "id", expense._id }
                 }))
             }
         };
         bsonDocuments.Add(bsonDocument);
     }
-    
+
     // Insert the BsonDocuments into the "Group" collection
     groupCollection.InsertMany(bsonDocuments);
     Console.WriteLine("Groups migrated successfully.");
 }
 
-static void InjectExpensesToMongo(string mongoConnStr, string mongoDatabase)
-{
+static void InjectExpensesToMongo(string mongoConnStr, string mongoDatabase) {
     // Create a MongoClient with the connection string
     var mongoClient = new MongoClient(mongoConnStr);
-    
+
     // Get the specified database
     var mongoDb = mongoClient.GetDatabase(mongoDatabase);
-    
+
     // Get the "Expense" collection (if it doesn't exist, it will be created)
     var expenseCollection = mongoDb.GetCollection<BsonDocument>("Expense");
-    
+
     // Navigate to the desired target directory relative to the current directory
     string parentDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
     string targetDirectory = Path.Combine(parentDirectory, "jsonData");
-    
+
     // Read the JSON file
     var jsonFilePath = Path.Combine(targetDirectory, "expenses.json");
     var jsonData = File.ReadAllText(jsonFilePath);
 
     // Deserialize JSON data into a list of Expense objects
     var expenses = JsonConvert.DeserializeObject<List<MongoExpense>>(jsonData);
-    
+
     // Convert the list of Expense objects to a list of BsonDocument
     var bsonDocuments = new List<BsonDocument>();
-    foreach (var expense in expenses)
-    {
-        var bsonDocument = new BsonDocument
-        {
+    foreach (var expense in expenses) {
+        var bsonDocument = new BsonDocument {
             { "_id", expense._id ?? throw new ArgumentNullException(nameof(expense._id)) },
-            { "title", expense.title ?? throw new ArgumentNullException(nameof(expense.title)) },
-            { "amount", expense.amount != null ? Convert.ToDecimal(expense.amount) : throw new ArgumentNullException(nameof(expense.amount)) },
-            { "date", DateTime.Parse(expense.date) },
-            { "owner", new BsonDocument
-                {
+            { "title", expense.title ?? throw new ArgumentNullException(nameof(expense.title)) }, {
+                "amount",
+                expense.amount != null ? Convert.ToDecimal(expense.amount) : throw new ArgumentNullException(nameof(expense.amount))
+            },
+            { "date", DateTime.Parse(expense.date) }, {
+                "owner", new BsonDocument {
                     { "id", expense.owner?.user_id ?? throw new ArgumentNullException(nameof(expense.owner.user_id)) },
                     { "name", expense.owner?.name ?? throw new ArgumentNullException(nameof(expense.owner.name)) },
                     { "phone_number", expense.owner?.phone_number ?? throw new ArgumentNullException(nameof(expense.owner.phone_number)) }
                 }
-            },
-            { "group", new BsonDocument
-                {
+            }, {
+                "group", new BsonDocument {
                     { "id", expense.group?._id ?? throw new ArgumentNullException(nameof(expense.group._id)) },
                     { "name", expense.group?.name ?? throw new ArgumentNullException(nameof(expense.group.name)) },
                     { "token", expense.group?.token ?? throw new ArgumentNullException(nameof(expense.group.token)) }
@@ -296,12 +287,11 @@ static void InjectExpensesToMongo(string mongoConnStr, string mongoDatabase)
         };
         bsonDocuments.Add(bsonDocument);
     }
-    
+
     // Insert the BsonDocuments into the "Expense" collection
     expenseCollection.InsertMany(bsonDocuments);
     Console.WriteLine("Expenses migrated successfully.");
 }
-
 
 
 static void MigrateUsers(string mysqlConnStr, string mongoConnStr, string mongoDatabase) {
@@ -504,28 +494,36 @@ static BsonDocument GetGroupById(string mysqlConnStr, string groupId) {
     return null;
 }
 
-public class MongoUser
-{
+public class MongoUser {
     public string user_id { get; set; }
+
     public string name { get; set; }
+
     public string phone_number { get; set; }
 }
 
-public class MongoExpense
-{
+public class MongoExpense {
     public string _id { get; set; }
+
     public string title { get; set; }
+
     public string amount { get; set; }
+
     public string date { get; set; }
+
     public MongoUser owner { get; set; }
+
     public MongoGroup group { get; set; }
 }
 
-public class MongoGroup
-{
+public class MongoGroup {
     public string _id { get; set; }
+
     public string name { get; set; }
+
     public string token { get; set; }
+
     public List<MongoUser> users { get; set; }
+
     public List<MongoExpense> expenses { get; set; }
 }
