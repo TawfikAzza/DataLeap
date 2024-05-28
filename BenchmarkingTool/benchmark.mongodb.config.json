@@ -1,0 +1,10 @@
+{
+  "Name": "MongoDB Queries",
+  "DatabaseType": "mongodb",
+  "Queries": [
+    {
+      "Name": "Find User by Id",
+      "Query": "queries/find_user_by_id.mongodb.json"
+    }
+  ]
+}
