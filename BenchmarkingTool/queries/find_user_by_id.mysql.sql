@@ -1,0 +1,1 @@
+SELECT * FROM User WHERE Id = UUID_TO_BIN('9e18bba3-f98b-3c4a-9912-ace4e6543001');
