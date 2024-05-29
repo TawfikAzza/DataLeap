@@ -4,7 +4,7 @@
 - Docker
 - .NET Core 8
 
-## Steps to Run the EzMigrationTool
+## Running ezMigrationTool to execute a test migration
 
 1. **Start Docker Compose**
    - Navigate to the root folder of the app and run:
